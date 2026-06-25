@@ -1,0 +1,8 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: spring-core
+  threads:
+    virtual:
+      enabled: true
