@@ -1,0 +1,10 @@
+terminator:
+  main:
+    mission: save the planet
+
+task:
+  name: "Prod Data Processing Task"
+  duration: 600
+  valueList: 4, 5
+  valueSet: abc, def, ghi, abc # should be unique, handled by Set, but duplicates are allowed in YAML
+  valueMap: "{key1: 100, key2: 200}"

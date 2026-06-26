@@ -1,0 +1,411 @@
+### --- Search (GET /reservations/search) ---
+
+###
+### Search all reservations, paginated and sorted
+GET http://localhost:8080/reservations/search?page=0&size=2&sort=startDate,desc
+
+###
+### Search by id (also covers "get single reservation by id")
+GET http://localhost:8080/reservations/search?ids=1
+
+###
+### Search by multiple ids (IN)
+GET http://localhost:8080/reservations/search?ids=1&ids=2&ids=3
+
+###
+### Search by userId
+GET http://localhost:8080/reservations/search?userIds=1
+
+###
+### Search by multiple userIds (IN)
+GET http://localhost:8080/reservations/search?userIds=1&userIds=2
+
+###
+### Search by multiple userIds, comma-separated (equivalent to repeated params above)
+GET http://localhost:8080/reservations/search?userIds=1,2
+
+###
+### Search by roomId
+GET http://localhost:8080/reservations/search?roomIds=101
+
+###
+### Search by status
+GET http://localhost:8080/reservations/search?statuses=PENDING
+
+###
+### Search by exact startDate
+GET http://localhost:8080/reservations/search?startDate=2023-10-01
+
+###
+### Search by exact endDate
+GET http://localhost:8080/reservations/search?endDate=2023-10-05
+
+###
+### Search combined (AND across fields)
+GET http://localhost:8080/reservations/search?statuses=PENDING&roomIds=101
+
+###
+### Search combined, no match (expect empty page, still 200)
+GET http://localhost:8080/reservations/search?userIds=1&statuses=CANCELLED
+
+###
+### Search by nonexistent id (expect empty page, NOT 404 — /search always returns 200)
+GET http://localhost:8080/reservations/search?ids=999999
+
+### --- Active in period (GET /reservations/active) ---
+
+###
+### Reservations active in a given period (overlap, excludes CANCELLED)
+GET http://localhost:8080/reservations/active?from=2023-10-01&to=2023-10-10
+
+###
+### Invalid: from > to (expect 400)
+GET http://localhost:8080/reservations/active?from=2026-10-20&to=2026-10-01
+
+###
+### Invalid: missing 'to' (expect 400)
+GET http://localhost:8080/reservations/active?from=2026-10-01
+
+###
+### Invalid: missing both params (expect 400)
+GET http://localhost:8080/reservations/active
+
+### --- Create (POST /reservations/create) ---
+
+###
+### Create reservation (id and status must be null)
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05"
+}
+
+### --- Update (PUT /reservations/update?id=) ---
+
+###
+### Update reservation (only PENDING can be updated)
+PUT http://localhost:8080/reservations/update?id=11
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 1000,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10"
+}
+
+###
+### Invalid: missing 'id' param (expect 400)
+PUT http://localhost:8080/reservations/update
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 1000,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10"
+}
+
+###
+### Invalid: reservation not found (expect 404)
+PUT http://localhost:8080/reservations/update?id=999999
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 1000,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10"
+}
+
+### --- Delete (DELETE /reservations/delete?id=) ---
+
+###
+### Delete reservation
+DELETE http://localhost:8080/reservations/delete?id=1
+
+###
+### Invalid: missing 'id' param (expect 400)
+DELETE http://localhost:8080/reservations/delete
+
+###
+### Invalid: reservation not found (expect 404)
+DELETE http://localhost:8080/reservations/delete?id=999999
+
+### --- Approve (POST /reservations/approve?id=) ---
+
+###
+### Approve reservation (PENDING -> APPROVED)
+POST http://localhost:8080/reservations/approve?id=1
+
+###
+### Invalid: missing 'id' param (expect 400)
+POST http://localhost:8080/reservations/approve
+
+###
+### Invalid: reservation not found (expect 404)
+POST http://localhost:8080/reservations/approve?id=999999
+
+###
+### Invalid: reservation not PENDING (expect 409, run twice in a row to trigger)
+POST http://localhost:8080/reservations/approve?id=1
+
+### --- Cancel (POST /reservations/cancel?id=) ---
+
+###
+### Cancel reservation
+POST http://localhost:8080/reservations/cancel?id=1
+
+###
+### Invalid: missing 'id' param (expect 400)
+POST http://localhost:8080/reservations/cancel
+
+###
+### Invalid: reservation not found (expect 404)
+POST http://localhost:8080/reservations/cancel?id=999999
+
+###
+### Invalid: already CANCELLED (expect 409, run twice in a row to trigger)
+POST http://localhost:8080/reservations/cancel?id=1
+
+### --- Validation examples on /create (expect 400 with ErrorResponse body) ---
+
+###
+### Invalid: id must be null
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "id": 1,
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05"
+}
+
+###
+### Invalid: status must be null
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05",
+  "status": "APPROVED"
+}
+
+###
+### Invalid: userId and roomId must not be null
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05"
+}
+
+###
+### Invalid: userId must be >= 0
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": -1,
+  "roomId": 111,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05"
+}
+
+###
+### Invalid: dates must be present or future
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2020-01-01",
+  "endDate": "2026-07-05"
+}
+
+###
+### Invalid: startDate must not be after endDate (business rule, expect 400)
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2026-07-10",
+  "endDate": "2026-07-05"
+}
+
+###
+### Invalid: overlapping dates for the same room (business rule, expect 409;
+### run right after the "Create reservation" request above so room 111 is booked)
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 12,
+  "roomId": 111,
+  "startDate": "2026-07-03",
+  "endDate": "2026-07-08"
+}
+
+###
+### Invalid: malformed JSON body (expect 400)
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+"not valid json"
+
+###
+### Invalid: wrong Content-Type (expect 415)
+POST http://localhost:8080/reservations/create
+Content-Type: text/plain
+
+{
+  "userId": 11,
+  "roomId": 111,
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-05"
+}
+
+### --- Availability check (POST /reservation-availability/check) ---
+
+###
+### Fixture: book room 500 for 2027-01-10..2027-01-15 (needed by the checks below)
+POST http://localhost:8080/reservations/create
+Content-Type: application/json
+
+{
+  "userId": 80,
+  "roomId": 500,
+  "startDate": "2027-01-10",
+  "endDate": "2027-01-15"
+}
+
+###
+### Available: room with no reservations at all
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 501,
+  "startDate": "2027-01-10",
+  "endDate": "2027-01-15"
+}
+
+###
+### Reserved: overlaps the booked room 500
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2027-01-12",
+  "endDate": "2027-01-13"
+}
+
+###
+### Available: same room 500, non-overlapping dates
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2027-02-01",
+  "endDate": "2027-02-05"
+}
+
+###
+### Reserved: edge-to-edge overlap (new startDate == existing endDate, boundary is inclusive)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2027-01-15",
+  "endDate": "2027-01-20"
+}
+
+###
+### Invalid: startDate must not be after endDate (business rule, expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2027-01-20",
+  "endDate": "2027-01-15"
+}
+
+###
+### Invalid: startDate must be present or future (expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2020-01-01",
+  "endDate": "2027-01-13"
+}
+
+###
+### Invalid: endDate must be present or future (expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500,
+  "startDate": "2027-01-12",
+  "endDate": "2020-01-01"
+}
+
+###
+### Invalid: roomId must not be null (expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "startDate": "2027-01-12",
+  "endDate": "2027-01-13"
+}
+
+###
+### Invalid: roomId must be >= 0 (expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": -1,
+  "startDate": "2027-01-12",
+  "endDate": "2027-01-13"
+}
+
+###
+### Invalid: startDate and endDate must not be null (expect 400)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: application/json
+
+{
+  "roomId": 500
+}
+
+###
+### Invalid: wrong Content-Type (expect 415)
+POST http://localhost:8080/reservation-availability/check
+Content-Type: text/plain
+
+{
+  "roomId": 500,
+  "startDate": "2027-01-12",
+  "endDate": "2027-01-13"
+}

@@ -6,3 +6,28 @@ spring:
   threads:
     virtual:
       enabled: true
+  profiles:
+    active: prod
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+
+terminator:
+  main:
+    mission: open Pandora's box
+
+task:
+  name: "Data Processing Task"
+  duration: 60
+  valueList: 1, 2, 3, 4, 5
+  valueSet: abc, def, ghi
+  valueMap: "{key1: 100, key2: 200, key3: 300}"

@@ -1,0 +1,1 @@
+org.springframework.boot.EnvironmentPostProcessor=org.total.example.spring_core.remake_advanced.puzzler_1.env.TerminatorMissionEnvironmentPostProcessor
