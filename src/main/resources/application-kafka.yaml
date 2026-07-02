@@ -1,0 +1,20 @@
+spring:
+  kafka:
+    # NOTE: since only "spring-kafka" (not "spring-boot-starter-kafka") is on the classpath,
+    # Spring Boot never reads "spring.kafka.*" itself - there is no autoconfiguration that
+    # would build KafkaTemplate/ConsumerFactory beans from it. These two properties exist
+    # purely because KafkaProducerConfig/KafkaConsumerConfig pull them in manually via
+    # @Value - keep that in mind before adding more nested "spring.kafka.*" properties here,
+    # they will silently do nothing unless something explicitly reads them.
+    bootstrap-servers: localhost:9092
+    consumer:
+      # consumer group id: all instances sharing this id split the topic's partitions
+      # between them, and Kafka tracks committed offsets per (group, partition) - see
+      # KafkaConsumerConfig#consumerFactory
+      group-id: orders-service
+
+# custom (non-Spring-namespaced) properties, read via @Value in both config classes and in
+# OrderProducer/OrderConsumer
+kafka:
+  topic:
+    orders: orders-topic

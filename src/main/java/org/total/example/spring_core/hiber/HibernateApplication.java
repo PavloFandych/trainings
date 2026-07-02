@@ -2,8 +2,12 @@ package org.total.example.spring_core.hiber;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.LazyInitializationException;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.total.example.spring_core.hiber.entity.Course;
 import org.total.example.spring_core.hiber.entity.Group;
@@ -19,11 +23,18 @@ import java.time.LocalDateTime;
 @Slf4j
 @SpringBootApplication(scanBasePackages = {
         "org.total.example.spring_core.hiber"
+}, exclude = {
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        JdbcTemplateAutoConfiguration.class,
+        org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration.class
 })
 public class HibernateApplication {
 
     static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(HibernateApplication.class, args);
+        ConfigurableApplicationContext context = new SpringApplicationBuilder(HibernateApplication.class)
+                .web(WebApplicationType.NONE)
+                .run(args);
 
         CourseService courseService = context.getBean(CourseService.class);
         GroupService groupService = context.getBean(GroupService.class);

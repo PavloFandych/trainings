@@ -1,10 +1,8 @@
 package org.total.example.spring_core.web;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
-@Slf4j
 @SpringBootApplication(scanBasePackages = {
         "org.total.example.spring_core.advanced.bean_post_processors", // for profiling bpp
         "org.total.example.spring_core.advanced.profiling", // for profiling
@@ -13,6 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class WebSpringBootApplication {
 
     static void main(String[] args) {
-        SpringApplication.run(WebSpringBootApplication.class, args);
+        new SpringApplicationBuilder(WebSpringBootApplication.class)
+                .profiles("prod")
+                .properties("server.port=8080")
+                .run(args);
     }
 }
