@@ -1,2 +1,1 @@
-docker run --name hibernate-postgres -p 5432:5432 -e POSTGRES_PASSWORD=root -d postgres
-docker start hibernate-postgres
+docker exec -it example-redis redis-cli

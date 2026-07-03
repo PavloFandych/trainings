@@ -18,8 +18,8 @@ public class KafkaProducerStringBootApplication {
 
     static void main(String[] args) {
         new SpringApplicationBuilder(KafkaProducerStringBootApplication.class)
-                .profiles("kafka") // activates application-kafka.yaml
-                .properties("server.port=8081") // exposes POST /orders (see OrderController)
+                .profiles("kafka")
+                .properties("server.port=8081")
                 .run(args);
     }
 }

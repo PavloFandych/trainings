@@ -2,6 +2,7 @@ package org.total.example.spring_core.kafka.producer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -28,14 +29,15 @@ public class OrderProducer {
         // whether the broker actually accepted the record.
         kafkaTemplate.send(ordersTopic, order.orderId(), order)
                 .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("failed to send order to kafka: {}", order, ex);
-                    } else {
+                    if (ex == null) {
+                        RecordMetadata recordMetadata = result.getRecordMetadata();
                         log.info("order sent to kafka: topic={}, partition={}, offset={}, order={}",
-                                result.getRecordMetadata().topic(),
-                                result.getRecordMetadata().partition(),
-                                result.getRecordMetadata().offset(),
+                                recordMetadata.topic(),
+                                recordMetadata.partition(),
+                                recordMetadata.offset(),
                                 order);
+                    } else {
+                        log.error("failed to send order to kafka: {}", order, ex);
                     }
                 });
     }

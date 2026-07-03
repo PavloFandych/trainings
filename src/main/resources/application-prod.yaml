@@ -9,6 +9,13 @@ spring:
       ddl-auto: none
     show-sql: true
     open-in-view: false
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+  cache:
+    redis:
+      time-to-live: 300s
   flyway:
     enabled: true
 

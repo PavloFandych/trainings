@@ -1,7 +1,9 @@
 package org.total.example.spring_core.web.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,10 +29,12 @@ public class CustomReservationService implements ReservationService {
 
     private final ManualReservationRepository reservationRepository;
     private final ReservationMapper reservationMapper;
+    private final ReservationSearchCache reservationSearchCache;
 
     @Override
     public Page<Reservation> search(ReservationSearchCriteria criteria, Pageable pageable) {
-        return reservationRepository.search(criteria, pageable).map(reservationMapper::toModel);
+        ReservationSearchPage cached = reservationSearchCache.search(criteria, pageable);
+        return new PageImpl<>(cached.content(), pageable, cached.totalElements());
     }
 
     @Override
@@ -43,6 +47,7 @@ public class CustomReservationService implements ReservationService {
     }
 
     @Override
+    @CacheEvict(cacheNames = ReservationSearchCache.CACHE_NAME, allEntries = true)
     public Reservation save(Reservation reservation) {
         if (hasInvalidDateOrder(reservation)) {
             throw new ReservationCreationException("Invalid reservation dates");
@@ -64,6 +69,7 @@ public class CustomReservationService implements ReservationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = ReservationSearchCache.CACHE_NAME, allEntries = true)
     public Reservation update(Long id, Reservation reservation) {
         ReservationEntity existing = reservationRepository
                 .findById(id)
@@ -91,6 +97,7 @@ public class CustomReservationService implements ReservationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = ReservationSearchCache.CACHE_NAME, allEntries = true)
     public Reservation approve(Long id) {
         ReservationEntity existing = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
@@ -106,6 +113,7 @@ public class CustomReservationService implements ReservationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = ReservationSearchCache.CACHE_NAME, allEntries = true)
     public Reservation cancel(Long id) {
         ReservationEntity existing = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
@@ -121,6 +129,7 @@ public class CustomReservationService implements ReservationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = ReservationSearchCache.CACHE_NAME, allEntries = true)
     public void delete(Long id) {
         if (reservationRepository.deleteByIdAndGetCount(id) == 0) {
             throw new ReservationNotFoundException(id);

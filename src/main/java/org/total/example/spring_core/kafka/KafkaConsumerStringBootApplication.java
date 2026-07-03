@@ -19,12 +19,8 @@ public class KafkaConsumerStringBootApplication {
 
     static void main(String[] args) {
         new SpringApplicationBuilder(KafkaConsumerStringBootApplication.class)
-                // this process only polls Kafka - it never receives HTTP requests, so there's
-                // no reason to pay for an embedded Tomcat. WebApplicationType.NONE skips
-                // starting a web server entirely (as opposed to excluding the autoconfiguration
-                // class, which would still leave web-server-flavored properties/beans in play).
-                .web(WebApplicationType.NONE)
-                .profiles("kafka") // activates application-kafka.yaml
+                .web(WebApplicationType.NONE) // skips starting a web server entirely
+                .profiles("kafka")
                 .run(args);
     }
 }
